@@ -10,7 +10,7 @@ class Laberinto {
 public:
     Laberinto(QGraphicsScene *scene);
     void crear();
-    bool hayColision(const QRectF &rect) const;
+    bool hayColision(const QRectF &rect) const;  // Declaración correcta
 
     static const int CELL_SIZE = 22;
     static const int FILAS = 22;

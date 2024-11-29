@@ -2,6 +2,8 @@
 #include <QGraphicsEllipseItem>
 #include <QBrush>
 #include "laberinto.h"
+#include "fantasma.h"
+
 
 Pacman::Pacman(QWidget *parent)
     : QMainWindow(parent), direction(0), puntuacion(0) {
@@ -31,37 +33,50 @@ Pacman::Pacman(QWidget *parent)
 void Pacman::setupGame() {
     puntuacion = 0;
 
-    // Inicializa Pac-Man en una posición libre
-    pacman = scene->addEllipse(0, 0, Laberinto::CELL_SIZE - 4, Laberinto::CELL_SIZE - 4, QPen(Qt::black), QBrush(Qt::yellow));
-    pacman->setPos(Laberinto::CELL_SIZE * 1, Laberinto::CELL_SIZE * 1);  // Posición inicial segura
+    // Crea a Pac-Man con tamaño ajustado para evitar colisiones
+    pacman = scene->addEllipse(0, 0, Laberinto::CELL_SIZE - 12, Laberinto::CELL_SIZE - 12, QPen(Qt::black), QBrush(Qt::yellow));
+
+    // Ajusta la posición inicial de Pac-Man
+    pacman->setPos(Laberinto::CELL_SIZE * 1 + 2, Laberinto::CELL_SIZE * 1 + 2);  // Pequeño desplazamiento para evitar bordes
 
     // Verificar si Pac-Man está colisionando con un muro en la posición inicial
-    QRectF pacmanRect(pacman->pos(), QSizeF(17, 17));  // Asegúrate de que Pac-Man tenga un tamaño adecuado
+    QRectF pacmanRect(pacman->pos(), QSizeF(Laberinto::CELL_SIZE - 12, Laberinto::CELL_SIZE - 12));
     if (laberinto->hayColision(pacmanRect)) {
         qDebug() << "Pac-Man está colisionando con un muro en la posición inicial";
     }
+
+    fantasmas.append(new Fantasma(scene, 0, 5, 5, laberinto));  // Fantasma rojo
+    fantasmas.append(new Fantasma(scene, 1, 5, 6, laberinto));  // Fantasma rosa
+    fantasmas.append(new Fantasma(scene, 2, 5, 7, laberinto));  // Fantasma azul
+    fantasmas.append(new Fantasma(scene, 3, 5, 8, laberinto));  // Fantasma naranja
+
 }
+
 
 void Pacman::keyPressEvent(QKeyEvent *event) {
     switch (event->key()) {
     case Qt::Key_D:  // Derecha
         direction = 0;
+        qDebug() << "Dirección: Derecha";
         break;
     case Qt::Key_S:  // Abajo
         direction = 1;
+        qDebug() << "Dirección: Abajo";
         break;
     case Qt::Key_A:  // Izquierda
         direction = 2;
+        qDebug() << "Dirección: Izquierda";
         break;
     case Qt::Key_W:  // Arriba
         direction = 3;
+        qDebug() << "Dirección: Arriba";
         break;
     }
 }
 
 void Pacman::updateGame() {
     QPointF pos = pacman->pos();  // Posición actual
-    QPointF newPos = pos;         // Nueva posición tentativa
+    QPointF newPos = pos;
 
     // Calcular nueva posición según la dirección
     switch (direction) {
@@ -80,7 +95,7 @@ void Pacman::updateGame() {
     }
 
     // Crear un rectángulo representando la nueva posición de Pac-Man
-    QRectF pacmanRect(newPos, QSizeF(Laberinto::CELL_SIZE - 4, Laberinto::CELL_SIZE - 4));  // Tamaño de Pac-Man
+    QRectF pacmanRect(newPos, QSizeF(Laberinto::CELL_SIZE - 8, Laberinto::CELL_SIZE - 8));  // Tamaño ajustado de Pac-Man
 
     // Verificar colisión con muros
     if (!laberinto->hayColision(pacmanRect)) {
